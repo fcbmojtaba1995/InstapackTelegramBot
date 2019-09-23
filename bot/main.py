@@ -30,7 +30,7 @@ def parse_update(update):
         first_name = update['message']['from']['first_name']
         last_name = update['message']['from']['last_name'] if 'last_name' in update['message']['from'] else None
         text = update['message']['text']
-        handle_user_message(chat_id, user_id, first_name, last_name, username, text)
+        user_command_handler(chat_id, user_id, first_name, last_name, username, text)
 
     elif 'callback_query' in update:
 
@@ -46,7 +46,8 @@ def parse_update(update):
         text = update['callback_query']['data']
 
 
-def handle_user_message(chat_id, user_id, first_name, last_name, username, text):
+# User Command Handler Function
+def user_command_handler(chat_id, user_id, first_name, last_name, username, text):
     if text == '/start':
         start_command_handler(chat_id, user_id, first_name, last_name, username)
     else:
