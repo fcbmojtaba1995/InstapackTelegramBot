@@ -48,10 +48,13 @@ def parse_update(update):
 
 def handle_user_message(chat_id, user_id, first_name, last_name, username, text):
     if text == '/start':
-        start_command_action(chat_id, user_id, first_name, last_name, username)
+        start_command_handler(chat_id, user_id, first_name, last_name, username)
+    else:
+        pass
 
 
-def start_command_action(chat_id, user_id, first_name, last_name, username):
+# Start Command Handler Function
+def start_command_handler(chat_id, user_id, first_name, last_name, username):
     bot_functions.send_chat_action(chat_id=chat_id, action='typing')
     query = "select * from users WHERE user_id={}".format(user_id)
     db_config.cursor.execute(query)
