@@ -3,6 +3,12 @@ import config as db_config
 
 api_token = '960175982:AAGLHQvIzlLv7iHksaWV6DR2soVlgPlb0Tk'
 
+# Admin Bot Info
+channel_id = "@nashenas_7learn"
+bot_username = "file_shop_7learn_bot"
+admin_user_id = 252519699
+bot_directory = "http://fbf55e78.ngrok.io/telegram-bot-course/project3/"
+
 
 def bot(data):
     res = requests.get("https://api.telegram.org/bot{}/{}".format(api_token, data))
@@ -75,11 +81,10 @@ def get_step(user_id):
 
 
 def set_step(user_id, step):
-    query = "update users set step={} WHERE user_id={}".format(step, user_id)
-    db_config.cursor.execute(query)
+    query = "UPDATE users SET step = (%s) WHERE user_id = (%s)"
+    val = (step, user_id)
+    db_config.cursor.execute(query, val)
     db_config.cnx.commit()
-    res = db_config.cursor.fetchall()
-    return res
 
 
 def get_admin_step(user_id):

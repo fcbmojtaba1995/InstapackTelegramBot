@@ -1,5 +1,6 @@
 import mysql.connector
 
+# Instapack Database Info
 db_config = {
     'user': 'root',
     'password': '123456789',
@@ -11,6 +12,7 @@ cnx = mysql.connector.connect(**db_config)
 cursor = cnx.cursor()
 
 
+# Connect to Instapack Database
 def connect_to_database():
     set_name_query = "SET NAMES 'utf8mb4'"
     set_character_query = "SET CHARACTER SET 'utf8mb4'"
@@ -19,6 +21,3 @@ def connect_to_database():
     cursor.execute(set_character_query)
     cursor.execute(set_session_collation_connection)
     cnx.commit()
-
-    cursor.close()
-    cnx.close()
