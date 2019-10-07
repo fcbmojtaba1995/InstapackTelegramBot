@@ -4,6 +4,7 @@ from flask import Flask, request, Response
 import config as db_config
 import functions as bot_functions
 import messages
+from Instagram_API import search as instagram_api_search
 
 app = Flask(__name__)
 
@@ -51,7 +52,7 @@ def user_command_handler(chat_id, user_id, first_name, last_name, username, text
     if text == '/start':
         start_command_handler(chat_id, user_id, first_name, last_name, username)
     else:
-        pass
+        username_command_handler(chat_id, text)
 
 
 # Start Command Handler Function
@@ -67,8 +68,24 @@ def start_command_handler(chat_id, user_id, first_name, last_name, username):
         db_config.cursor.execute(query, val)
         db_config.cnx.commit()
 
+    # markup = {'inline_keyboard': [[{'text': 'this is my button', 'callback_data': 'callback-data'},
+    #                               {'text': 'this is my button', 'callback_data': 'callback-data'}]]}
     bot_functions.send_message(chat_id=chat_id, msg=messages.welcome_msg)
-    bot_functions.set_step(user_id, 'home')
+
+
+def username_command_handler(chat_id, text):
+    if '@' in str(text):
+        at_sign_char_index = str(text).index('@')
+        if at_sign_char_index == 0:
+            text = text[1:]
+    if 'https://instagram.com/' in str(text):
+        url_char_index = str(text).index('https://instagram.com/')
+        if url_char_index == 0:
+            text = text[22:]
+    username_pk = instagram_api_search.get_user_pk(text)
+    if username_pk is not None:
+        bot_functions.send_chat_action(chat_id=chat_id, action='typing')
+        bot_functions.send_message(chat_id=chat_id, msg=username_pk)
 
 
 if __name__ == '__main__':
