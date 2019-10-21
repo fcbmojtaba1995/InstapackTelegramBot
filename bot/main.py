@@ -1,11 +1,11 @@
-import requests
 import json
 from flask import Flask, request, Response
 import config as db_config
 import functions as bot_functions
 import inline_keyboards_handler
-import messages
+from Public import messages
 from Instagram_API import functions as instagram_api
+import urllib.parse
 
 # setup flask and index page
 app = Flask(__name__)
@@ -97,15 +97,18 @@ def username_command_handler(chat_id, user_id, text):
 
         if username_info == '404':  # 404 mean : user not found
             bot_functions.send_chat_action(chat_id=chat_id, action='typing')
-            bot_functions.send_message(chat_id=chat_id, msg=messages.user_not_found)
+            bot_functions.send_message(chat_id=chat_id, msg=messages.user_not_found + bot_functions.bot_address_caption,
+                                       parse_mode='HTML')
 
         elif username_info == '401':  # 401 mean : wrong input
             bot_functions.send_chat_action(chat_id=chat_id, action='typing')
-            bot_functions.send_message(chat_id=chat_id, msg=messages.wrong_input)
+            bot_functions.send_message(chat_id=chat_id, msg=messages.wrong_input + bot_functions.bot_address_caption,
+                                       parse_mode='HTML')
 
         elif username_info == '403':  # 403 mean : login required (the problem is ours : cookies is expired)
             bot_functions.send_chat_action(chat_id=chat_id, action='typing')
-            bot_functions.send_message(chat_id=chat_id, msg=messages.bot_not_work)
+            bot_functions.send_message(chat_id=chat_id, msg=messages.bot_not_work + bot_functions.bot_address_caption,
+                                       parse_mode='HTML')
 
         else:
             full_name = username_info['full_name']
@@ -141,7 +144,8 @@ def username_command_handler(chat_id, user_id, text):
 \U0001F517 <b>لینک:</b>
 
 <a href='{}'>{}</a>
-'''.format(full_name, username, media_count, follower_count, following_count, page_status, biography.replace('#', ''),
+'''.format(full_name, username, media_count, follower_count, following_count, page_status,
+           urllib.parse.quote_plus(biography),
            external_url, external_url) + bot_functions.bot_address_caption
 
             markup = {'inline_keyboard': [[{'text': '\U0001F4E5 ' + 'بیوگرافی', 'callback_data': 'get_biography'},
@@ -154,9 +158,10 @@ def username_command_handler(chat_id, user_id, text):
                                             'url': 'https://instagram.com/{}'.format(text)}]]}
 
             bot_functions.send_chat_action(chat_id=chat_id, action='upload_photo')
-            message_id = bot_functions.send_photo(chat_id=chat_id,
-                                                  photo_link=username_info['hd_profile_pic_url_info']['url'],
-                                                  caption=caption, parse_mode='HTML', markup=json.dumps(markup))
+            response = bot_functions.send_photo(chat_id=chat_id,
+                                                photo_link=username_info['hd_profile_pic_url_info']['url'],
+                                                caption=caption, parse_mode='HTML', markup=json.dumps(markup))
+            message_id = response['result']['message_id']
             bot_functions.set_last_message_id(user_id, message_id)
 
 
@@ -175,10 +180,13 @@ def inline_keyboard_handler(chat_id, user_id, text):
 
     elif text == 'get_highlights':
         pass
+
     elif text == 'get_stories':
         pass
+
     elif text == 'get_posts':
-        pass
+        inline_keyboards_handler.get_user_posts(chat_id, user_id)
+
     elif text == 'show_page':
         pass
 

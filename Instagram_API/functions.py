@@ -9,7 +9,7 @@ base_url = 'https://i.instagram.com/api/v1/'
 def get_username_info(username):
     if re.match("^([A-Za-z0-9_](?:(?:[A-Za-z0-9_]|(?:\.(?!\.))){0,28}(?:[A-Za-z0-9_]))?)$", username):
         url = base_url + 'users/{}/usernameinfo/'.format(username)
-        response = requests.get(url, headers=config.headers)
+        response = requests.post(url, headers=config.headers)
 
         if response.status_code == 200:  # 200 mean : request ok and user founded
             user_info = response.json()['user']
@@ -47,17 +47,17 @@ def get_user_id(username):
 
 
 # get user posts function
-def get_user_posts(user_id):
-    url = base_url + 'feed/user/{}'.format(user_id)
-    response = requests.get(url, headers=config.headers).json()
-    print(response)
-    # status = response['status']
-    #
-    # if status == 'ok':
-    #     #posts = response['items']
-    #     return posts
-    # else:
-    #     return '401'  # 401 mean : not authorized to view user(page is private)
+def get_user_posts(username):
+    username_info = get_username_info(username)
+    user_id = username_info['pk']
+    url = base_url + 'feed/user/{}/'.format(user_id)
+    response = requests.post(url, headers=config.headers)
 
+    if response.status_code == 200:  # 200 mean : request ok and user founded
+        return response.json()
 
-get_user_posts(get_user_id('bmw'))
+    elif response.status_code == 400:
+        return '400'  # 400 mean : not authorized to view user(page is private)
+
+    elif response.status_code == 403:  # 403 mean : login required (the problem is ours : cookies is expired)
+        return '403'

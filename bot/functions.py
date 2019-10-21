@@ -12,10 +12,9 @@ bot_address_caption = "\n\n\U0001F916<a href='{}'>{}</a>".format('tg://user?id={
 base_url = 'https://api.telegram.org/bot{}/'.format(api_token)
 
 
-def bot(data):
-    res = requests.get("https://api.telegram.org/bot{}/{}".format(api_token, data))
-    print(res.json())
-    return res.json()
+def bot(method_name):
+    response = requests.get(base_url + method_name)
+    return response.json()
 
 
 def send_message(chat_id, msg, markup=None, parse_mode=None, disable_web_page_preview=True):
@@ -57,34 +56,29 @@ def delete_message(chat_id, message_id):
 
 
 def send_photo(chat_id, photo_link, caption=None, parse_mode=None, markup=None):
-    if parse_mode is not None:
-        if markup is not None:
+    response = bot("sendPhoto?chat_id={}&photo={}&caption={}&reply_markup={}&parse_mode={}".format(
+        chat_id, photo_link, caption, markup, parse_mode))
 
-            url = base_url + "sendPhoto?chat_id={}&photo={}&caption={}&reply_markup={}&parse_mode={}".format(
-                chat_id, photo_link, caption, markup, parse_mode)
-            res = requests.get(url)
-            return res.json()['result']['message_id']
-        else:
-
-            bot("sendPhoto?chat_id={}&photo={}&caption={}&parse_mode={}".format(chat_id, photo_link, caption,
-                                                                                parse_mode))
-
-    else:
-        if markup is not None:
-
-            bot("sendPhoto?chat_id={}&photo={}&caption={}&reply_markup={}".format(chat_id, photo_link, caption, markup))
-
-        else:
-
-            bot("sendPhoto?chat_id={}&photo={}&caption={}".format(chat_id, photo_link, caption))
+    return response
 
 
 def edit_message_caption(chat_id, message_id):
     bot("editMessageReplyMarkup?chat_id={}&message_id={}".format(chat_id, message_id))
 
 
-def send_video(chat_id, video_link, caption=None):
-    bot("sendVideo?chat_id={}&video={}&caption={}".format(chat_id, video_link, caption))
+def send_video(chat_id, video_link, caption=None, parse_mode=None, markup=None):
+    response = bot(
+        "sendVideo?chat_id={}&video={}&caption={}&parse_mode={}&reply_markup={}&supports_streaming={}".format(chat_id,
+                                                                                                              video_link,
+                                                                                                              caption,
+                                                                                                              parse_mode,
+                                                                                                              markup,
+                                                                                                              True))
+    return response
+
+
+def send_media_group(chat_id, media, reply_to_message_id):
+    bot("sendMediaGroup?chat_id={}&media={}&reply_to_message_id={}".format(chat_id, media, reply_to_message_id))
 
 
 def send_file(chat_id, file_id, caption=None):
