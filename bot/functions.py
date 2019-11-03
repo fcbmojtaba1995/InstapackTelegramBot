@@ -1,4 +1,5 @@
-import requests
+import urllib3
+import json
 import config as db_config
 
 api_token = '848398962:AAEgrgPTEHBNXnDiGBSaPGEGHlstSA9WvwE'
@@ -13,22 +14,25 @@ base_url = 'https://api.telegram.org/bot{}/'.format(api_token)
 
 
 def bot(method_name):
-    response = requests.get(base_url + method_name)
-    return response.json()
+    response = urllib3.PoolManager().request(method='GET', url=base_url + method_name)
+    return json.loads(response.data.decode('utf-8'))
 
 
-def send_message(chat_id, msg, markup=None, parse_mode=None, disable_web_page_preview=True):
+def send_message(chat_id, msg, markup=None, parse_mode=None, disable_web_page_preview=True, reply_to_message_id=None):
     if parse_mode is not None:
         if markup is not None:
 
-            bot("sendMessage?chat_id={}&text={}&reply_markup={}&parse_mode={}&disable_web_page_preview={}".format(
-                chat_id, msg, markup, parse_mode, disable_web_page_preview))
+            bot(
+                "sendMessage?chat_id={}&text={}&reply_markup={}&parse_mode={}&disable_web_page_preview={}&reply_to_message_id={}".format(
+                    chat_id, msg, markup, parse_mode, disable_web_page_preview, reply_to_message_id))
 
         else:
 
-            bot("sendMessage?chat_id={}&text={}&parse_mode={}&disable_web_page_preview={}".format(chat_id, msg,
-                                                                                                  parse_mode,
-                                                                                                  disable_web_page_preview))
+            bot(
+                "sendMessage?chat_id={}&text={}&parse_mode={}&disable_web_page_preview={}&reply_to_message_id={}".format(
+                    chat_id, msg,
+                    parse_mode,
+                    disable_web_page_preview, reply_to_message_id))
 
     else:
         if markup is not None:
@@ -55,10 +59,15 @@ def delete_message(chat_id, message_id):
     bot("deleteMessage?chat_id={}&message_id={}".format(chat_id, message_id))
 
 
-def send_photo(chat_id, photo_link, caption=None, parse_mode=None, markup=None):
-    response = bot("sendPhoto?chat_id={}&photo={}&caption={}&reply_markup={}&parse_mode={}".format(
-        chat_id, photo_link, caption, markup, parse_mode))
-
+def send_photo(chat_id, photo_link, caption=None, parse_mode=None, markup=None, reply_to_message_id=None):
+    if markup is not None:
+        response = bot(
+            "sendPhoto?chat_id={}&photo={}&caption={}&reply_markup={}&parse_mode={}&reply_to_message_id={}".format(
+                chat_id, photo_link, caption, markup, parse_mode, reply_to_message_id))
+    else:
+        response = bot(
+            "sendPhoto?chat_id={}&photo={}&caption={}&parse_mode={}&reply_to_message_id={}".format(
+                chat_id, photo_link, caption, parse_mode, reply_to_message_id))
     return response
 
 

@@ -26,7 +26,6 @@ def index():
 # parse received update function
 def parse_update(update):
     if 'message' in update:
-
         user_id = update['message']['from']['id']
         chat_id = update['message']['chat']['id']
         message_id = update['message']['message_id']
@@ -37,8 +36,7 @@ def parse_update(update):
         user_command_handler(chat_id, user_id, message_id, first_name, last_name, username, text)
 
     elif 'callback_query' in update:
-
-        callback_id = update['callback_query']['id']
+        callback_query_id = update['callback_query']['id']
         user_id = update['callback_query']['from']['id']
         chat_id = update['callback_query']['message']['chat']['id']
         message_id = update['callback_query']['message']['message_id']
@@ -48,7 +46,7 @@ def parse_update(update):
         last_name = update['callback_query']['from']['last_name'] if 'last_name' in update['callback_query'][
             'from'] else None
         text = update['callback_query']['data']
-        inline_keyboard_handler(chat_id, user_id, text)
+        inline_keyboard_handler(callback_query_id, chat_id, message_id, user_id, text)
 
 
 # User Command Handler Function
@@ -149,8 +147,7 @@ def username_command_handler(chat_id, user_id, text):
            external_url, external_url) + bot_functions.bot_address_caption
 
             markup = {'inline_keyboard': [[{'text': '\U0001F4E5 ' + 'بیوگرافی', 'callback_data': 'get_biography'},
-                                           {'text': '\U0001F4E5 ' + 'عکس پروفایل',
-                                            'callback_data': 'get_user_profile'}],
+                                           {'text': '\U0001F4E5 ' + 'پروفایل', 'callback_data': 'get_profile'}],
                                           [{'text': '\U0001F4E5 ' + 'هایلایت ها', 'callback_data': 'get_highlights'},
                                            {'text': '\U0001F4E5 ' + 'استوری ها', 'callback_data': 'get_stories'},
                                            {'text': '\U0001F4E5 ' + 'پست ها', 'callback_data': 'get_posts'}],
@@ -171,23 +168,31 @@ def edit_prev_message(chat_id, message_id):
 
 
 # inline keyboard handler function
-def inline_keyboard_handler(chat_id, user_id, text):
-    if text == 'get_biography':
-        inline_keyboards_handler.get_biography(chat_id, user_id)
+def inline_keyboard_handler(callback_query_id, chat_id, message_id, user_id, text):
+    if text == 'get_biography':  # main keyboard
+        inline_keyboards_handler.get_biography(chat_id, user_id, message_id)
 
-    elif text == 'get_user_profile':
-        inline_keyboards_handler.get_user_profile(chat_id, user_id)
+    elif text == 'get_profile':  # main keyboard
+        inline_keyboards_handler.get_user_profile(chat_id, user_id, message_id)
 
-    elif text == 'get_highlights':
-        pass
-
-    elif text == 'get_stories':
-        pass
-
-    elif text == 'get_posts':
+    elif text == 'get_posts':  # main keyboard
         inline_keyboards_handler.get_user_posts(chat_id, user_id)
 
-    elif text == 'show_page':
+    elif text.split('@')[0] == 'show_post_info':  # inline get_posts keyboard
+        inline_keyboards_handler.get_user_post_info(callback_query_id, chat_id, media_id=text.split('@')[1])
+
+    elif text.split('@')[0] == 'see_more_caption':  # inline get_posts keyboard
+        inline_keyboards_handler.see_more_caption(chat_id, message_id, media_id=text.split('@')[1])
+
+    elif text.split('@')[0] == 'show_more_posts':  # inline get_posts keyboard
+
+        inline_keyboards_handler.show_more_user_posts(chat_id, user_id=text.split('@')[1],
+                                                      next_max_id=text.split('@')[2])
+
+    elif text == 'get_stories':  # main keyboard
+        pass
+
+    elif text == 'get_highlights':  # main keyboard
         pass
 
 
